@@ -1,0 +1,37 @@
+services:
+  springboot-app:
+    image: alstjr971/qrust-image:latest
+    container_name: springboot-app
+    ports:
+      - "8080:8080"
+    environment:
+      GOOGLE_SAFE_BROWSING_API_KEY: AIzaSyBSnROv9pgrvXQ0TZiy2yEFen-kKxo0Tjw
+      GOOGLE_SAFE_BROWSING_BASE_URL: https://safebrowsing.googleapis.com/
+      CRYPTO_AES_KEY: U0VDUkVUX0tFWV9GT1JfUVJfQ1JZUFRP
+      JWT_SECRET: qrustjwtsecretkeyqrustjwtsecretkey
+      AI_MODEL_BASE_URL: http://ec2-54-180-101-190.ap-northeast-2.compute.amazonaws.com:8000/
+      DOMAIN_ADDRESS: http://mayfifth99.store:9000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: qrust
+      DB_USERNAME: spring
+      DB_PASSWORD: alstjrwnsgud
+
+      REDIS_HOST: redis
+      REDIS_PASSWORD: alstjrwnsgud
+
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: miniospring
+      MINIO_SECRET_KEY: minioalstjrwnsgud
+      MINIO_BUCKET_NAME: qrust-bucket
+
+      SPRING_PROFILES_ACTIVE: prod
+
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true  # 이미 DB/Redis/MinIO가 실행 중이면 동일 네트워크에 붙이기
+    name: docker_compose_backend

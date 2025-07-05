@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qrust-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: qrust-api
+  template:
+    metadata:
+      labels:
+        app: qrust-api
+    spec:
+      containers:
+        - name: qrust-api
+          # Jenkins 파이프라인에서 이 부분을 실제 이미지로 교체합니다.
+          image: your-docker-registry/qrust-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            # Spring Profile 설정
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+
+            # ConfigMap에서 가져올 환경변수들
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: DB_HOST # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: DB_PORT # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: DB_NAME # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: REDIS_HOST # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: GOOGLE_SAFE_BROWSING_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: GOOGLE_SAFE_BROWSING_BASE_URL # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: MINIO_ENDPOINT # 이 key는 ConfigMap에 추가해야 합니다.
+            - name: MINIO_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: qrust-config
+                  key: MINIO_BUCKET_NAME # 이 key는 ConfigMap에 추가해야 합니다.
+
+            # Secret에서 가져올 환경변수들
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: DB_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: REDIS_PASSWORD
+            - name: CRYPTO_AES_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: CRYPTO_AES_KEY
+            - name: GOOGLE_SAFE_BROWSING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: GOOGLE_SAFE_BROWSING_API_KEY
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qrust-secret
+                  key: MINIO_SECRET_KEY
+          # 애플리케이션이 시작되기 전에 설정 파일(application.yml)을 마운트
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: qrust-config
